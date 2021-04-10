@@ -13,6 +13,10 @@ output wire enable_pulse
 wire [DIVIDER_LOG2-1:0] max_value = {DIVIDER_LOG2{1'b1}};
 reg [DIVIDER_LOG2-1:0] clock_divider;
 
+//clk   _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+//dplse _____________________________/-\_____________________________/-\
+//rdadr x0                             x1                              x 2
+
 assign enable_pulse = (clock_divider == max_value) ? 1'b1 : 1'b0;
 
 always @(posedge clk) begin

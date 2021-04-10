@@ -16,6 +16,7 @@ reg [OUTPUT_WIDTH-1:0] out_value;
 
 assign dac_out = out_value;
 
+// TODO: If output at max level, DO NOT OVERFLOW!!!!
 always @(posedge clk) begin
 	accumulator <= {1'b0, accumulator[INPUT_WIDTH-1:0]} + sample[INPUT_WIDTH-OUTPUT_WIDTH-1:0];
 	out_value <= sample[INPUT_WIDTH-1:INPUT_WIDTH-OUTPUT_WIDTH] + accumulator[INPUT_WIDTH];

@@ -15,15 +15,6 @@ wire step_pulse;
 // Sample coming out of wave generator into our pdm
 wire [15:0] sample;
 
-`ifdef USE_COMM
-comm_interface u_comm_interface (
-	.rxd(rxd),
-	.txd(txd),
-	.wr_addr(wr_addr),
-	.wr_data(wr_data)
-);
-
-`else
 clock_divider #(
 	.DIVIDER_LOG2(4) // Triggers every 16 cycles
 ) u_clock_divider (
@@ -32,6 +23,33 @@ clock_divider #(
 	.enable_pulse(step_pulse)
 );
 
+`ifdef USE_SINE
+comm_interface u_comm_interface (
+	.clk(clk),
+	.reset(reset),
+	.rxd(rxd),
+	.txd(txd),
+	.we_enable(wr_enable),
+	.wr_addr(wr_addr),
+	.wr_data(wr_data),
+	.step(step),
+	.range(range)
+);
+
+arb_wavegen #(
+) u_arb_wavegen (
+	.clk(clk),
+	.reset(reset),
+	.enable_pulse(step_pulse),
+	.step(step),
+	.range(range),
+	.wr_enable(wr_enable),
+	.wr_addr(wr_addr),
+	.wr_data(wr_data),
+	.wave_out(sample)
+);
+
+`else
 sinegen u_sinegen(
 	.clk(clk),
 	.reset(reset),
