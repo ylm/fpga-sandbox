@@ -23,13 +23,19 @@ clock_divider #(
 	.enable_pulse(step_pulse)
 );
 
-`ifdef USE_SINE
+`ifndef USE_SINE
+wire wr_enable; // Assert high when writting to the arb_wavegen
+wire [11:0] wr_addr; // Address at which sample gets written (sample width aligned)
+wire [15:0] wr_data; // Sample data value
+wire [11:0] step; // Step increment to the wave generator
+wire [11:0] range; // Highest address with sample content
+
 comm_interface u_comm_interface (
 	.clk(clk),
 	.reset(reset),
 	.rxd(rxd),
 	.txd(txd),
-	.we_enable(wr_enable),
+	.wr_enable(wr_enable),
 	.wr_addr(wr_addr),
 	.wr_data(wr_data),
 	.step(step),

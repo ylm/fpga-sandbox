@@ -12,6 +12,11 @@ reg tested_value [0:2047]; //Tested values checklist
 integer clk_cycle = 0; // Clock cycle counter
 integer idx = 0; // Iterator for checklist
 
+initial begin
+	$dumpfile("test.vcd");
+	$dumpvars(0,tb_top);
+end
+
 top u_top (
 	.clk(clk),
 	.reset(reset),
@@ -30,7 +35,7 @@ end
 always @(posedge clk) begin
 tested_value[dac_out] <= 1'b1;
 clk_cycle = clk_cycle + 1;
-if (clk_cycle == (2048*16)+5) begin // Wait 'til we've gone through a full wave cycle
+if (clk_cycle == (2048*18)+5) begin // Wait 'til we've gone through a full wave cycle
 	for (idx = 0; idx < 2048; idx = idx + 1) begin
 		$display("%b",tested_value[idx]); // Print our checklist
 	end

@@ -27,8 +27,10 @@ always @(posedge clk) begin
 	if (wr_enable) begin
 		wave_ram[wr_addr] <= wr_data;
 	end
-	rd_addr <= rd_addr + step;
-	out_value <= wave_ram[rd_addr];
+	if (enable_pulse) begin
+		rd_addr <= rd_addr + step;
+		out_value <= wave_ram[rd_addr];
+	end
 	if (reset) begin
 		rd_addr <= 12'b0;
 		out_value <= {OUTPUT_WIDTH-1{1'b0}};
