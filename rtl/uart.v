@@ -24,7 +24,7 @@ reg [9:0] tx_buffer;
 reg [3:0] rx_received;
 reg [3:0] tx_sent;
 
-assign txd = tx_buffer[8];
+assign txd = tx_buffer[9];
 assign rx_data = rx_buffer[8:1];
 
 reg [7:0] rx_baud_divider;
@@ -56,7 +56,7 @@ always @(posedge clk) begin
 	if (rx_receiving&rx_baud_enable) begin
 		rx_baud_middle <= ~rx_baud_middle;
 		if (rx_baud_middle) begin
-			rx_buffer <= {rx_buffer[6:0], rxd};
+			rx_buffer <= {rx_buffer[8:0], rxd};
 			rx_received <= rx_received + 4'd1;
 		end else begin
 			if (rx_received == 4'd10) begin
@@ -69,7 +69,7 @@ always @(posedge clk) begin
 		rx_receiving <= ~rxd;
 	end
 	if (reset) begin
-		rx_buffer <= 9'd0;
+		rx_buffer <= 10'd0;
 		rx_received <= 3'd0;
 		rx_receiving <= 1'b0;
 		rx_baud_middle <= 1'b1;
@@ -79,7 +79,7 @@ end
 // Transmit state machine
 always @(posedge clk) begin
 	if (busy&tx_baud_enable) begin
-		tx_buffer <= {tx_buffer[7:0], 1'b1};
+		tx_buffer <= {tx_buffer[8:0], 1'b1};
 		tx_sent <= tx_sent + 4'b1;
 		if (tx_sent == 4'd9) begin
 			busy <= 1'b0;
@@ -87,11 +87,11 @@ always @(posedge clk) begin
 		end
 	end
 	if (~busy & send_data) begin
-		tx_buffer <= {1'b0, tx_data};
+		tx_buffer <= {1'b0, tx_data, 1'b1};
 		busy <= 1'b1;
 	end
 	if (reset) begin
-		tx_buffer <= 9'h1ff;
+		tx_buffer <= 10'h3ff;
 		tx_sent <= 4'd0;
 		busy <= 1'b0;
 	end
