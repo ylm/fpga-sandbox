@@ -21,25 +21,48 @@ assign range = 12'hfff;
 reg init_done;
 reg [11:0] init_addr;
 reg [OUTPUT_WIDTH-1:0] init_data;
+reg [7:0] length;
+reg [7:0] rcv_bytes;
+reg [7:0] msgType;
+
 
 assign wr_enable = ~init_done;
 assign wr_addr = init_addr;
 assign wr_data = init_data;
 
-// LFSR for test purposes, will be replaced by data from host.
+uart #(
+	.INPUT_FREQ(INPUT_FREQ),
+	.BAUD_RATE(BAUD_RATE)
+) u_uart (
+	.clk(clk),
+	.reset(reset),
+	.rxd(rxd),
+	.txd(txd),
+	.received_data_intr(rx_intr),
+	.rx_data(rx_data),
+	.tx_data(tx_data),
+	.busy(busy),
+	.send_data(send_data)
+);
+
+// Communication protocol
 always @(posedge clk) begin
-	if (~init_done) begin
-		init_done <= &init_addr;
-		init_addr <= init_addr + 1'b1;
-		init_data <= {init_data[OUTPUT_WIDTH-2:0], 1'b0};
-		init_data[0] <= init_data[15] ^ init_data[13] ^ init_data[12] ^ init_data[10]; // Fibonnaci LFSR as per wikipedia
+if (rx_intr) begin
+	if (|length) begin
+		if (rcv_bytes == 8'd0) begin
+			msgType <= rx_data;
+		end
+		rcv_bytes <= rcv_bytes + 8'd1;
+		length <= length - 8'd1;
+	end else begin
+		length <= rx_data;
 	end
-	if (reset) begin
-		init_done <= 1'b0;
-		init_addr <= 12'd0;
-		init_data <= {OUTPUT_WIDTH{1'b0}};
-		init_data[4] <= 1'b1; // Requirement of LFSR is to never be zero
-	end
+end
+if (reset) begin
+	rcv_bytes <= 8'd0;
+	length <= 8'd0;
+	msgType <= 8'd0;
+end
 end
 
 endmodule
