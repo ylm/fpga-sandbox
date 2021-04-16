@@ -15,6 +15,9 @@ output wire [11:0] step,
 output wire [11:0] range
 );
 
+// TODO: Update configuration registers in a single step (instead of current
+// shift register fashion)
+// TODO: Maybe start/stop messages
 assign step = 12'd1;
 assign range = 12'hfff;
 
