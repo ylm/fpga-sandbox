@@ -24,9 +24,9 @@ assign range = 12'hfff;
 reg init_done;
 reg [11:0] init_addr;
 reg [OUTPUT_WIDTH-1:0] init_data;
-reg [7:0] length;
 reg [7:0] rcv_bytes_m1;	// Bytes rceived after length minus 1
 						// Effectively, the number of data bytes received
+reg [7:0] msgLength;
 reg [7:0] msgType;
 
 assign wr_enable = ~init_done;
@@ -49,6 +49,7 @@ uart #(
 );
 
 // Communication protocol
+// Formatted as: length, Type, value, value, ...
 // msgTypes:
 // 0x00 = RESERVED
 // 0x01 = SYS RESETS
@@ -60,7 +61,7 @@ always @(posedge clk) begin
 sys_reset <= 1'b0;
 wr_enable <= 1'b0;
 if (rx_intr) begin
-	if (|length) begin
+	if (|msgLength) begin
 		if (rcv_bytes_m1 == 8'hff) begin
 			msgType <= rx_data;
 		end else begin
@@ -79,14 +80,14 @@ if (rx_intr) begin
 			endcase
 		end
 		rcv_bytes_m1 <= rcv_bytes_m1 + 8'd1;
-		length <= length - 8'd1;
+		msgLength <= msgLength - 8'd1;
 	end else begin
-		length <= rx_data;
+		rcv_bytes_m1 <= 8'hff;
+		msgLength <= rx_data;
 	end
 end
 if (reset) begin
-	rcv_bytes_m1 <= 8'hff;
-	length <= 8'd0;
+	msgLength <= 8'd0;
 	msgType <= 8'd0;
 end
 end
